@@ -14,9 +14,11 @@ st.set_page_config(page_title='Defnity', page_icon=':bar_chart:', layout='wide')
 
 
 # supabase setup
-load_dotenv()
-supabase_url = os.getenv("SUPABASE_URL")
-supabase_key = os.getenv("SUPABASE_KEY")
+# load_dotenv()
+# supabase_url = os.getenv("SUPABASE_URL")
+# supabase_key = os.getenv("SUPABASE_KEY")
+supabase_url = st.secrets["SUPABASE_URL"]
+supabase_key = st.secrets["SUPABASE_KEY"]
 supabase_client = create_client(supabase_url, supabase_key)
 print(requests.get("https://aendrjdowanmdukuceeh.supabase.co").status_code)
 
