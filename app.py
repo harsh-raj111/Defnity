@@ -47,10 +47,11 @@ def login():
         email = st.text_input("email",key = "signup_email")
         password = st.text_input("password", type = "password" ,key = "signup_password")
         if st.button("create account"):
-            res = supabase_client.auth.sign_up({"email":email,"password":password})
-            if res.user:
+            if email and password:
+             res = supabase_client.auth.sign_up({"email":email,"password":password})
+             if res.user:
                 st.success("account created successfully!, Now login")
-            else:
+             else:
                 st.error("signup failed")
             
 # session check
