@@ -317,7 +317,7 @@ if uploaded_file is not None:
             st.caption(f"Profit calculated using {profit_souce} data")
         
 
-        col4 , col3 = st.colums(2)
+        col4 , col3 = st.columns(2)
         with col3:
             st.metric('Average Price',f'{currency_symbol}{average_price:,.2f}')
         with col4:
