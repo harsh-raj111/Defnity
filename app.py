@@ -14,9 +14,7 @@ st.set_page_config(page_title='Defnity', page_icon=':bar_chart:', layout='wide')
 
 
 # supabase setup
-# load_dotenv()
-# supabase_url = os.getenv("SUPABASE_URL")
-# supabase_key = os.getenv("SUPABASE_KEY")
+
 supabase_url = st.secrets["SUPABASE_URL"]
 supabase_key = st.secrets["SUPABASE_KEY"]
 supabase_client = create_client(supabase_url, supabase_key)
@@ -34,13 +32,17 @@ def login():
         email = st.text_input("email")
         password = st.text_input("password",type="password")
         if st.button("login"):
-            res = supabase_client.auth.sign_in_with_password({"email":email,"password":password})
-            if res.user:
-                st.session_state.user = res.user
-                st.success("logged in successfully")
-                st.rerun()
+         try:
+            if email and password:
+             res = supabase_client.auth.sign_in_with_password({"email":email,"password":password})
+             st.session_state.user = res.user
+             st.success("logged in successfully")
+             st.rerun()
             else:
-                st.error("Invalid credentials")
+                st.error("Please enter email and password")
+         except Exception as e:
+            st.error(f" Invalid email or password. Login failed: {e}")
+            
     # signup form
 
     with tab2:
@@ -73,10 +75,47 @@ user_id = st.session_state.user.id
 
 # uploading data 
 
-st.title("Defnity Sales Analytics")
+st.title("Defnity Sales Analytic Tool")
+
+
 if st.button("logout"):
  st.session_state.user = None
  st.rerun()
+
+#  info 
+
+st.markdown("## 📁 Upload Your Data")
+
+st.info("""
+Upload a CSV with columns like:
+
+• price / revenue  
+• quantity  
+• product  
+• date  
+
+Optional:
+• cost (for profit calculation)  
+• profit (if already available)
+""")
+
+with st.expander("📖 View detailed format & example"):
+    st.markdown("""
+### Example Format:
+
+| product | price | quantity | cost | date |
+|--------|------|----------|------|------|
+| A      | 100  | 2        | 60   | 2024-01-01 |
+
+---
+
+
+
+### Notes:
+- Column names are auto-detected  
+- Avoid empty or invalid values  
+- Clean data = better insights
+""")
 
 uploaded_file = st.sidebar.file_uploader('Upload your file',type = ['csv','xlsx', 'xlsm'])
 if uploaded_file is not None:
@@ -95,6 +134,14 @@ if uploaded_file is not None:
                     if keyword in column_lower:
                         return column
             return None
+        # safe convert 
+        def safe_convert(df,col):
+            try:
+                return pd.to_numeric(df[col],errors ='coerce').fillna(0)
+            except Exception as e:
+                st.error(f" Error processing column {col}: {e} . please check your data format.")
+                st.write("Debug info:",str(e))
+                st.stop()
         
       #   smart keyword detection
 
@@ -102,7 +149,8 @@ if uploaded_file is not None:
         qty_keywords = ['quantity','qty','units','count']
         date_keywords = ['date','time','day','month','year','created','updated']
         product_keywords = ['product','item','name','description','category','type']
-        cost_keywords = ['cost','expense','amount','price','value','expense','purchase','buy','cogs']
+        cost_keywords = ['cost','expense','value','purchase','buy','cogs']
+        profit_keywords = ['profit','margin','earnings','net']
 
       #   detect columns
 
@@ -111,6 +159,7 @@ if uploaded_file is not None:
         auto_date = detect_column(columns,date_keywords)
         auto_product = detect_column(columns,product_keywords)
         auto_cost = detect_column(columns,cost_keywords)
+        auto_profit = detect_column(columns,profit_keywords)
 
       #   selectbox with default values 
 
@@ -119,6 +168,7 @@ if uploaded_file is not None:
         date_column = st.selectbox('select date column',columns,index=columns.index(auto_date) if auto_date else 0)
         product_column = st.selectbox('select product column',columns,index=columns.index(auto_product) if auto_product else 0)
         cost_column = st.selectbox('select cost column (optional)',columns,index=columns.index(auto_cost) if auto_cost else 0)
+        profit_column = st.selectbox('select profit column (optional)',columns,index=columns.index(auto_profit) if auto_profit else 0)
         currency_symbol = st.text_input('Enter currency symbol (optional)', value='$')
 
       # data preprocessing
@@ -127,6 +177,9 @@ if uploaded_file is not None:
         df[price_column] = pd.to_numeric(df[price_column],errors='coerce')
         df[qty_column] = pd.to_numeric(df[qty_column],errors = 'coerce')
         df[cost_column] = pd.to_numeric(df[cost_column],errors = 'coerce')
+        if profit_column in df.columns:
+            df[profit_column] = pd.to_numeric(df[profit_column],errors = 'coerce')
+
         df = df.dropna(subset=[price_column,date_column])
         def clean_numeric(df,col):
             df[col]=df[col].astype(str).str.replace(r'[^\d.]','',regex=True)
@@ -152,6 +205,21 @@ if uploaded_file is not None:
         st.write(f"Data covers from {start_date.date()} to {end_date.date()}")
         st.dataframe(df.head(20))
 
+        # data mismatch handling 
+        if price_column not in df.columns:
+            st.error("inavlid price column selected, please check your selection")
+            st.stop()
+        if date_column not in df.columns:
+            st.error("inavlid date column selected, please check your selection")
+            st.stop()
+        if product_column not in df.columns:
+            st.error("inavlid product column selected, please check your selection")
+            st.stop()
+        if cost_column not in df.columns:
+            st.error("inavlid cost column selected, please check your selection")
+            st.stop()
+
+
       # metrices
         if qty_column: 
             df['Total_revenue'] = df[price_column] * df[qty_column]
@@ -166,13 +234,37 @@ if uploaded_file is not None:
         busy_month = df.groupby(date_column)[qty_column].sum().idxmax()
         Top_products_byRevenue  = df.groupby(product_column)[price_column].sum().sort_values(ascending=False).head(5)
         Top_products_bySales = df.groupby(product_column)[qty_column].sum().sort_values(ascending=False).head(5)
-        df['Profit'] = (df[price_column]- df[cost_column])*df[qty_column]
-        total_profit = df['Profit'].sum()
+        
+        
         total_loss = df[df['Profit']<0]['Profit'].sum()
         profit_margin = st.slider("Estimate profit margin (%)", 0, 100, 20)
-        df['Estimated_profit'] = df['Total_revenue']*(profit_margin/100)
-        total_estimated_profit = df['Estimated_profit'].sum()
-        total_loss = 0
+        
+
+        # profit
+        try:
+         if profit_column in df.columns:
+            df['profit'] = safe_convert(df,profit_column)
+            profit_souce = "direct"
+         elif cost_column in df.columns:
+            price = safe_convert(df,price_column)
+            qty = safe_convert(df,qty_column)
+            cost = safe_convert(df,cost_column)
+            df['Profit'] = (price*qty)-(cost*qty)
+         else:
+            price = safe_convert(df,price_column)
+            qty = safe_convert(df,qty_column)
+            df['Revenue'] = price*qty
+            df['Profit'] = df['Revenue']*(profit_margin/100)
+            profit_souce = "caculated"
+         total_profit = df['Profit'].sum()
+        except Exception as e:
+         st.error("unable to calculate profit with given data, showing 0 profit")
+         st.write(str(e))
+         df['Profit'] = 0
+         total_profit = 0
+           
+
+        # total_loss = 0
 
         # csv export 
         summary_data = {
@@ -227,13 +319,14 @@ if uploaded_file is not None:
             st.metric('Highest Price',f'{currency_symbol}{highest_price:,.2f}')
         
 
-        col5 , col6 , col7 ,col8 = st.columns(4)
+        col5 , col6 , col8 = st.columns(3)
         with col5:
             st.metric('Total Profit',f'{currency_symbol}{total_profit:,.2f}')
+            st.caption(f"Profit calculated using {profit_souce} data")
         with col6:
             st.metric('Total Loss',f'{currency_symbol}{total_loss:,.2f}')
-        with col7:
-            st.metric('Estimated Profit',f'{currency_symbol}{total_estimated_profit:,.2f}')
+            st.caption("Sum of all negative profit values")
+        
         with col8:
             st.metric('Profit Margin',f'{profit_margin}%')
 
@@ -261,7 +354,7 @@ if uploaded_file is not None:
             st.warning(f"Average monthly growth is {avg_growth:.2f}% which is negative")
         else:
             st.info("Average monthly growth is 0% which is stable")
-        if total_profit > 0 or total_estimated_profit > 0:
+        if total_profit > 0 :
             st.success("Overall profitable business")
         else:
             st.error("Overall loss making business")
