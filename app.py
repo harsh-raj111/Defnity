@@ -86,7 +86,7 @@ if st.button("logout"):
 
 st.markdown("## 📁 Upload Your Data")
 
-st.info("""
+st.info ("""
 Upload a CSV with columns like:
 
 • price / revenue  
@@ -308,18 +308,19 @@ if uploaded_file is not None:
         )
       #   kpis
 
-        col1,col2,col3 , col4  = st.columns(4)
+        col1,col2,col3 ,  = st.columns(3)
         with col1:
             st.metric('Total Revenue',f'{currency_symbol}{total_revenue:,.2f}')
         with col2:
             st.metric('Total Sales',f'{total_sales:,.0f}')
         with col3:
             st.metric('Average Price',f'{currency_symbol}{average_price:,.2f}')
-        with col4:
-            st.metric('Highest Price',f'{currency_symbol}{highest_price:,.2f}')
+        
         
 
-        col5 , col6 , col8 = st.columns(3)
+        col4 ,col5 , col6 , col8 = st.columns(4)
+        with col4:
+            st.metric('Highest Price',f'{currency_symbol}{highest_price:,.2f}')
         with col5:
             st.metric('Total Profit',f'{currency_symbol}{total_profit:,.2f}')
             st.caption(f"Profit calculated using {profit_souce} data")
