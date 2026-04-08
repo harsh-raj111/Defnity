@@ -336,7 +336,7 @@ if uploaded_file is not None:
             st.metric('Total Loss',f'{currency_symbol}{total_loss:,.2f}')
             st.caption("Sum of all negative profit values")
         
-        col7 = st.columns(1)[0]
+        col7 = st.columns(1)
         
         with col7:
             st.metric('Profit Margin',f'{profit_margin}%')
