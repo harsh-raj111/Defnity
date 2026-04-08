@@ -326,7 +326,7 @@ if uploaded_file is not None:
         
         
 
-        col5 , col6 , col7 = st.columns(3)
+        col5 , col6 = st.columns(2)
         
         with col5:
             st.metric('Total Sales',f'{total_sales:,.0f}')
@@ -336,10 +336,7 @@ if uploaded_file is not None:
             st.metric('Total Loss',f'{currency_symbol}{total_loss:,.2f}')
             st.caption("Sum of all negative profit values")
         
-        col7 = st.columns(1)
         
-        with col7:
-            st.metric('Profit Margin',f'{profit_margin}%')
 
          
 
@@ -349,8 +346,8 @@ if uploaded_file is not None:
         fig1 = px.bar(df.groupby(date_column)['Total_revenue'].sum().reset_index(),x=date_column,y='Total_revenue',title='Revenue Over Time')
         if qty_column:
          fig2 = px.bar(df.groupby(product_column)[qty_column].sum().reset_index(),x=product_column,y=qty_column,title='Sales by Product')
-        col5.plotly_chart(fig1,use_container_width=True)
-        col6.plotly_chart(fig2,use_container_width=True)
+        col8.plotly_chart(fig1,use_container_width=True)
+        col9.plotly_chart(fig2,use_container_width=True)
         df['Month'] = df[date_column].dt.to_period('M').astype(str)
         monthly = df.groupby('Month')['Total_revenue'].sum().reset_index()
         fig3 = px.line(monthly,x='Month',y='Total_revenue',title='Monthly Revenue Trend')
