@@ -308,32 +308,42 @@ if uploaded_file is not None:
         )
       #   kpis
 
-        col1,col2,col3 ,  = st.columns(3)
+        col1,col2  = st.columns(2)
         with col1:
             st.metric('Total Revenue',f'{currency_symbol}{total_revenue:,.2f}')
+        
         with col2:
-            st.metric('Total Sales',f'{total_sales:,.0f}')
+            st.metric('Total Profit',f'{currency_symbol}{total_profit:,.2f}')
+            st.caption(f"Profit calculated using {profit_souce} data")
+        
+
+        col4 , col3 = st.colums(2)
         with col3:
             st.metric('Average Price',f'{currency_symbol}{average_price:,.2f}')
+        with col4:
+            st.metric('Highest Price',f'{currency_symbol}{highest_price:,.2f}')
+            
         
         
 
-        col4 ,col5 , col6 , col8 = st.columns(4)
-        with col4:
-            st.metric('Highest Price',f'{currency_symbol}{highest_price:,.2f}')
+        col5 , col6 , col7 = st.columns(3)
+        
         with col5:
-            st.metric('Total Profit',f'{currency_symbol}{total_profit:,.2f}')
-            st.caption(f"Profit calculated using {profit_souce} data")
+            st.metric('Total Sales',f'{total_sales:,.0f}')
+        
+        
         with col6:
             st.metric('Total Loss',f'{currency_symbol}{total_loss:,.2f}')
             st.caption("Sum of all negative profit values")
         
-        with col8:
+        with col7:
             st.metric('Profit Margin',f'{profit_margin}%')
+
+         
 
          # graphs 
 
-        col5,col6 = st.columns(2)
+        col8,col9 = st.columns(2)
         fig1 = px.bar(df.groupby(date_column)['Total_revenue'].sum().reset_index(),x=date_column,y='Total_revenue',title='Revenue Over Time')
         if qty_column:
          fig2 = px.bar(df.groupby(product_column)[qty_column].sum().reset_index(),x=product_column,y=qty_column,title='Sales by Product')
@@ -361,12 +371,12 @@ if uploaded_file is not None:
             st.error("Overall loss making business")
         best_month = monthly.loc[monthly['Total_revenue'].idxmax()]
         st.info(f"Best month:{best_month['Month']} with  revenue of {best_month['Total_revenue']:.2f}")
-        col7,col8 = st.columns(2)
-        with col7:
+        col10,col11 = st.columns(2)
+        with col10:
             st.subheader('Top 5 Products by Revenue')
             st.dataframe(Top_products_byRevenue)
             
-        with col8:
+        with col11:
             st.subheader('Top 5 Products by Sales')
             st.dataframe(Top_products_bySales)
 
