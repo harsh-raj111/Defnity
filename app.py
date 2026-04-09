@@ -222,7 +222,7 @@ if uploaded_file is not None:
             df[cost_column] = pd.to_numeric(df[cost_column],errors = 'coerce')
         if profit_column:
             df[profit_column]= pd.to_numeric(df[profit_column],errors = 'coerce')
-        if profit_column in df.columns:
+        if profit_column and profit_column in df.columns:
             df[profit_column] = pd.to_numeric(df[profit_column],errors = 'coerce')
 
         df = df.dropna(subset=[price_column,date_column])
