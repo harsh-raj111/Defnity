@@ -461,15 +461,19 @@ if uploaded_file is not None:
            st.error(f"Error saving report: {e}")
 
         user_id = st.session_state.get("user_id")
-        res = supabase_client.table("defnity_reports").select("*").eq("user_id",user_id).execute()
-        data = res.data
-        df_user = pd.DataFrame(data)
-        if not df_user.empty:
-           df_user["created_at"] = pd.to_datetime(df_user["created_at"])
-           filtered_df = df_user[(df_user["created_at"] >= pd.to_datetime(filter_start))&(df_user["created_at"]<=pd.to_datetime(filter_end))]
-           st.subheader("Your Filtered Reports")
-           st.dataframe(filtered_df)
-        else :
+        if user_id:
+            res = supabase_client.table("defnity_reports").select("*").eq("user_id", user_id).execute()
+            data = res.data
+    
+        else:
+         data =[]
+         df_user = pd.DataFrame(data)
+         if not df_user.empty:
+              df_user["created_at"] = pd.to_datetime(df_user["created_at"])
+              filtered_df = df_user[(df_user["created_at"] >= pd.to_datetime(filter_start))&(df_user["created_at"]<=pd.to_datetime(filter_end))]
+              st.subheader("Your Filtered Reports")
+              st.dataframe(filtered_df)
+         else :
               st.info("No saved reports found for this user.")
 
        
