@@ -198,13 +198,18 @@ if uploaded_file is not None:
         auto_profit = detect_column(columns,profit_keywords)
 
       #   selectbox with default values 
+        numeric_columns = df.select_dtypes(include=['number']).columns.tolist()
 
         price_column = st.selectbox('select price column',columns,index=columns.index(auto_price) if auto_price else 0)
         qty_column = st.selectbox('select quantity column',columns,index=columns.index(auto_qty) if auto_qty else 0)
         date_column = st.selectbox('select date column',columns,index=columns.index(auto_date) if auto_date else 0)
         product_column = st.selectbox('select product column',columns,index=columns.index(auto_product) if auto_product else 0)
-        cost_column = st.selectbox('select cost column (optional)',columns,index=columns.index(auto_cost) if auto_cost else 0)
-        profit_column = st.selectbox('select profit column (optional)',columns,index=columns.index(auto_profit) if auto_profit else 0)
+        cost_column = st.selectbox('select cost column (optional)', ["None"] +  numeric_columns ,index=columns.index(auto_cost) if auto_cost else 0)
+        profit_column = st.selectbox('select profit column (optional)', ["None"] + numeric_columns,index=columns.index(auto_profit) if auto_profit else 0)
+        if cost_column == "None":
+           cost_column = None
+        if profit_column == "None":
+              profit_column = None
         currency_symbol = st.text_input('Enter currency symbol (optional)', value='$')
 
       # data preprocessing
@@ -213,6 +218,10 @@ if uploaded_file is not None:
         df[price_column] = pd.to_numeric(df[price_column],errors='coerce')
         df[qty_column] = pd.to_numeric(df[qty_column],errors = 'coerce')
         df[cost_column] = pd.to_numeric(df[cost_column],errors = 'coerce')
+        if cost_column:
+            df[cost_column] = pd.to_numeric(df[cost_column],errors = 'coerce')
+        if profit_column:
+            df[profit_column]= pd.to_numeric(df[profit_column],errors = 'coerce')
         if profit_column in df.columns:
             df[profit_column] = pd.to_numeric(df[profit_column],errors = 'coerce')
 
