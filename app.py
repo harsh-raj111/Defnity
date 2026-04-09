@@ -23,6 +23,13 @@ print(requests.get("https://aendrjdowanmdukuceeh.supabase.co").status_code)
 
 
 # authentication 
+if "guest" not in st.session_state:
+    st.session_state['guest'] = False
+if "logged_in" not in st.session_state:
+    st.session_state['logged_in'] = False
+if "user_id" not in st.session_state:
+    st.session_state["user_id"] = None
+    
 
 def login():
     st.title("login/signup")
@@ -31,16 +38,8 @@ def login():
     with tab1:
         
        
-        if "guest" not in st.session_state:
-              st.session_state['guest'] = False
-        if "logged_in" not in st.session_state:
-              st.session_state['logged_in'] = False
-        if st.button("Try as Guest"):
-            st.session_state['guest'] = True
-            st.session_state['logged_in'] = False
-            st.session_state["user_id"]=None
-            st.success("Continuing as guest")
-            st.rerun()
+        
+        
         email = st.text_input("email")
         password = st.text_input("password",type="password")
         if st.button("login"):
@@ -79,6 +78,13 @@ def login():
                 st.error("signup failed")
             
 # session check
+
+if st.button("Try as Guest"):
+            st.session_state['guest'] = True
+            st.session_state['logged_in'] = False
+            st.session_state["user_id"]=None
+            st.success("Continuing as guest")
+            st.rerun()
 
 if not st.session_state.get("logged_in") and not st.session_state.get("guest"):
    login()
@@ -443,8 +449,10 @@ if uploaded_file is not None:
         if st.button("saved report"):
          if st.session_state.get("guest"):
             st.warning("Guest users cannot save reports. Please create an account to use this feature.")
+        
+         
             
-         else:
+         else :
           try:
            supabase_client.table("defnity_reports").insert(data).execute()
            st.success("Report saved to database ✅")
