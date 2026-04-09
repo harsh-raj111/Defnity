@@ -30,16 +30,17 @@ def login():
     # login form 
     with tab1:
         
+       
+        if "guest" not in st.session_state:
+              st.session_state['guest'] = False
+        if "logged_in" not in st.session_state:
+              st.session_state['logged_in'] = False
         if st.button("Try as Guest"):
             st.session_state['guest'] = True
             st.session_state['logged_in'] = False
             st.session_state["user_id"]=None
             st.success("Continuing as guest")
             st.rerun()
-        if "guest" not in st.session_state:
-              st.session_state['guest'] = False
-        if "logged_in" not in st.session_state:
-              st.session_state['logged_in'] = False
         email = st.text_input("email")
         password = st.text_input("password",type="password")
         if st.button("login"):
@@ -51,15 +52,16 @@ def login():
                 st.error("Invalid email or password. Login failed.")
              else:
               user = res.user
-              st.session_state.user['user_id'] = user.id
-              st.session_state['logged_in'] = True
+              st.session_state["user_id"] = user.id
+              st.session_state["logged_in"] = True
+              st.session_state["guest"] = False
             
              st.success("logged in successfully")
              st.rerun()
             else:
                 st.error("Please enter email and password")
          except Exception as e:
-            st.error(f" Invalid email or password. Login failed: {e}")
+            st.error(f" Invalid email or password. ")
     if "guest_usage" not in st.session_state:
        st.session_state['guest_usage'] = 0
             
@@ -78,15 +80,9 @@ def login():
             
 # session check
 
-if "user" not in st.session_state:
-    st.session_state.user = None
-if st.session_state.user is None:
-    login()
-    st.stop()
-
-
-
-user_id = st.session_state.user.id
+if not st.session_state.get("logged_in") and not st.session_state.get("guest"):
+   login()
+   st.stop()
 
 
 
@@ -139,8 +135,8 @@ with st.expander("📖 View detailed format & example"):
 if st.session_state.get("logged_in"):
    user_id = st.session_state.get("user_id")
    st.sidebar.write(f"Logged in as: {user_id}")
-start_date = st.sidebar.date_input("Start Date")
-end_date = st.sidebar.date_input("End Date")
+filter_start = st.sidebar.date_input("Start Date")
+filter_end =  st.sidebar.date_input("End Date")
  
 
 
@@ -270,7 +266,7 @@ if uploaded_file is not None:
         Top_products_bySales = df.groupby(product_column)[qty_column].sum().sort_values(ascending=False).head(5)
         
         
-        total_loss = df[df['Profit']<0]['Profit'].sum()
+        
         profit_margin = st.slider("Estimate profit margin (%)", 0, 100, 20)
         
 
@@ -278,7 +274,7 @@ if uploaded_file is not None:
         try:
          if profit_column in df.columns:
             df['profit'] = safe_convert(df,profit_column)
-            profit_souce = "direct"
+            Profit_souce = "direct"
          elif cost_column in df.columns:
             price = safe_convert(df,price_column)
             qty = safe_convert(df,qty_column)
@@ -296,6 +292,7 @@ if uploaded_file is not None:
          st.write(str(e))
          df['Profit'] = 0
          total_profit = 0
+        total_loss = df[df['Profit']<0]['Profit'].sum()
            
 
         # total_loss = 0
@@ -446,7 +443,7 @@ if uploaded_file is not None:
         if st.button("saved report"):
          if st.session_state.get("guest"):
             st.warning("Guest users cannot save reports. Please create an account to use this feature.")
-            st.stop()
+            
         else:
          try:
           supabase_client.table("defnity_reports").insert(data).execute()
