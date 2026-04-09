@@ -32,16 +32,26 @@ def login():
         email = st.text_input("email")
         password = st.text_input("password",type="password")
         if st.button("login"):
+         if st.button("Try as Guest"):
+            st.session_state['guest'] = True
+            st.session_state['logged_in'] = False
+            st.success("Continuing as guest")
+            st.rerun()
          try:
             if email and password:
              res = supabase_client.auth.sign_in_with_password({"email":email,"password":password})
-             st.session_state.user = res.user
+             user = res.user
+             st.session_state.user['user_id'] = user.id
+             st.session_state['logged_in'] = True
+            
              st.success("logged in successfully")
              st.rerun()
             else:
                 st.error("Please enter email and password")
          except Exception as e:
             st.error(f" Invalid email or password. Login failed: {e}")
+    if "guest_usage" not in st.session_state:
+       st.session_state['guest_usage'] = 0
             
     # signup form
 
@@ -116,9 +126,23 @@ with st.expander("📖 View detailed format & example"):
 - Avoid empty or invalid values  
 - Clean data = better insights
 """)
+if st.session_state.get("logged_in"):
+   user_id = st.session_state.get("user_id")
+   st.sidebar.write(f"Logged in as: {user_id}")
+start_date = st.sidebar.date_input("Start Date")
+end_date = st.sidebar.date_input("End Date")
+ 
 
-uploaded_file = st.sidebar.file_uploader('Upload your file',type = ['csv','xlsx', 'xlsm'])
+
+uploaded_file = st.file_uploader('Upload your file',type = ['csv','xlsx', 'xlsm'])
+                                                                                              
 if uploaded_file is not None:
+   
+     if st.session_state.get("guest") and st.session_state['guest_usage'] >= 5:
+            st.warning("Guest usage limit reached. Please create an account to continue using the service.")
+            st.stop()
+     if st.session_state.get("guest"):
+      st.session_state['guest_usage'] += 1
      try:
         if uploaded_file.name.endswith('.csv'):
             df = pd.read_csv(uploaded_file)
@@ -398,7 +422,7 @@ if uploaded_file is not None:
             st.info(f"{Top_sales_name} sells most but  {top_rev_name} earns most revenue.")
         
         # save to db 
-       
+        user_id = st.session_state.get("user_id")
         data = {
         "user_id": user_id,
         "Total_revenue": float(total_revenue),
@@ -408,13 +432,30 @@ if uploaded_file is not None:
         "End_date": str(df[date_column].max())
 }
 
-       
+     
         if st.button("saved report"):
+         if st.session_state.get("guest"):
+            st.warning("Guest users cannot save reports. Please create an account to use this feature.")
+            st.stop()
+        else:
          try:
           supabase_client.table("defnity_reports").insert(data).execute()
           st.success("Report saved to database ✅")
+
          except Exception as e:
           st.error(f"Error saving report: {e}")
+
+        user_id = st.session_state.get("user_id")
+        res = supabase_client.table("defnity_reports").select("*").eq("user_id",user_id).execute()
+        data = res.data
+        df_user = pd.DataFrame(data)
+        if not df_user.empty:
+           df_user["created_at"] = pd.to_datetime(df_user["created_at"])
+           filtered_df = df_user[(df_user["created_at"] >= pd.to_datetime(start_date))&(df_user["created_at"]<=pd.to_datetime(end_date))]
+           st.subheader("Your Filtered Reports")
+           st.dataframe(filtered_df)
+        else :
+              st.info("No saved reports found for this user.")
 
        
 
