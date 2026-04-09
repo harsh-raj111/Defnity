@@ -262,9 +262,7 @@ if uploaded_file is not None:
         if product_column not in df.columns:
             st.error("inavlid product column selected, please check your selection")
             st.stop()
-        if cost_column not in df.columns:
-            st.error("inavlid cost column selected, please check your selection")
-            st.stop()
+        
 
 
       # metrices
