@@ -274,7 +274,7 @@ if uploaded_file is not None:
         try:
          if profit_column in df.columns:
             df['profit'] = safe_convert(df,profit_column)
-            Profit_souce = "direct"
+            profit_souce = "direct"
          elif cost_column in df.columns:
             price = safe_convert(df,price_column)
             qty = safe_convert(df,qty_column)
