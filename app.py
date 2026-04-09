@@ -204,8 +204,8 @@ if uploaded_file is not None:
         qty_column = st.selectbox('select quantity column',columns,index=columns.index(auto_qty) if auto_qty else 0)
         date_column = st.selectbox('select date column',columns,index=columns.index(auto_date) if auto_date else 0)
         product_column = st.selectbox('select product column',columns,index=columns.index(auto_product) if auto_product else 0)
-        cost_column = st.selectbox('select cost column (optional)', ["None"] +  numeric_columns ,index=columns.index(auto_cost) if auto_cost else 0)
-        profit_column = st.selectbox('select profit column (optional)', ["None"] + numeric_columns,index=columns.index(auto_profit) if auto_profit else 0)
+        cost_column = st.selectbox('select cost column (optional)', ["None"] +  numeric_columns ) 
+        profit_column = st.selectbox('select profit column (optional)', ["None"] + numeric_columns)
         if cost_column == "None":
            cost_column = None
         if profit_column == "None":
