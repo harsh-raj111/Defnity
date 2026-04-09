@@ -217,13 +217,15 @@ if uploaded_file is not None:
         df[date_column] = pd.to_datetime(df[date_column],errors='coerce')
         df[price_column] = pd.to_numeric(df[price_column],errors='coerce')
         df[qty_column] = pd.to_numeric(df[qty_column],errors = 'coerce')
-        df[cost_column] = pd.to_numeric(df[cost_column],errors = 'coerce')
+        
         if cost_column:
             df[cost_column] = pd.to_numeric(df[cost_column],errors = 'coerce')
         if profit_column:
             df[profit_column]= pd.to_numeric(df[profit_column],errors = 'coerce')
-        if profit_column and profit_column in df.columns:
-            df[profit_column] = pd.to_numeric(df[profit_column],errors = 'coerce')
+            profit_data = df[profit_column]
+        else :
+                profit_data = None
+        
 
         df = df.dropna(subset=[price_column,date_column])
         def clean_numeric(df,col):
