@@ -282,7 +282,7 @@ if uploaded_file is not None:
         
         
         
-        profit_margin = st.slider("Estimate profit margin (%)", 0, 100, 20)
+        profit_margin = st.slider("Estimate profit margin (%)", 0, 100, 0)
         
 
         # profit
