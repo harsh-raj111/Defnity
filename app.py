@@ -444,13 +444,13 @@ if uploaded_file is not None:
          if st.session_state.get("guest"):
             st.warning("Guest users cannot save reports. Please create an account to use this feature.")
             
-        else:
-         try:
-          supabase_client.table("defnity_reports").insert(data).execute()
-          st.success("Report saved to database ✅")
+         else:
+          try:
+           supabase_client.table("defnity_reports").insert(data).execute()
+           st.success("Report saved to database ✅")
 
-         except Exception as e:
-          st.error(f"Error saving report: {e}")
+          except Exception as e:
+           st.error(f"Error saving report: {e}")
 
         user_id = st.session_state.get("user_id")
         res = supabase_client.table("defnity_reports").select("*").eq("user_id",user_id).execute()
@@ -458,7 +458,7 @@ if uploaded_file is not None:
         df_user = pd.DataFrame(data)
         if not df_user.empty:
            df_user["created_at"] = pd.to_datetime(df_user["created_at"])
-           filtered_df = df_user[(df_user["created_at"] >= pd.to_datetime(start_date))&(df_user["created_at"]<=pd.to_datetime(end_date))]
+           filtered_df = df_user[(df_user["created_at"] >= pd.to_datetime(filter_start))&(df_user["created_at"]<=pd.to_datetime(filter_end))]
            st.subheader("Your Filtered Reports")
            st.dataframe(filtered_df)
         else :
