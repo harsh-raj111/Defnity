@@ -29,20 +29,30 @@ def login():
     tab1,tab2 = st.tabs(["Login","signup"])
     # login form 
     with tab1:
+        
+        if st.button("Try as Guest"):
+            st.session_state['guest'] = True
+            st.session_state['logged_in'] = False
+            st.session_state["user_id"]=None
+            st.success("Continuing as guest")
+            st.rerun()
+        if "guest" not in st.session_state:
+              st.session_state['guest'] = False
+        if "logged_in" not in st.session_state:
+              st.session_state['logged_in'] = False
         email = st.text_input("email")
         password = st.text_input("password",type="password")
         if st.button("login"):
-         if st.button("Try as Guest"):
-            st.session_state['guest'] = True
-            st.session_state['logged_in'] = False
-            st.success("Continuing as guest")
-            st.rerun()
+       
          try:
             if email and password:
              res = supabase_client.auth.sign_in_with_password({"email":email,"password":password})
-             user = res.user
-             st.session_state.user['user_id'] = user.id
-             st.session_state['logged_in'] = True
+             if res.user is None:
+                st.error("Invalid email or password. Login failed.")
+             else:
+              user = res.user
+              st.session_state.user['user_id'] = user.id
+              st.session_state['logged_in'] = True
             
              st.success("logged in successfully")
              st.rerun()
