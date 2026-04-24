@@ -8,6 +8,7 @@ import requests
 import uuid
 import os 
 from dotenv import load_dotenv
+
 # config
 
 st.set_page_config(page_title='Defnity', page_icon=':bar_chart:', layout='wide')
@@ -15,10 +16,11 @@ st.set_page_config(page_title='Defnity', page_icon=':bar_chart:', layout='wide')
 
 # supabase setup
 
-supabase_url = st.secrets["SUPABASE_URL"]
-supabase_key = st.secrets["SUPABASE_KEY"]
-supabase_client = create_client(supabase_url, supabase_key)
-print(requests.get("https://aendrjdowanmdukuceeh.supabase.co").status_code)
+supabase_url = st.secrets["supabase_url"] 
+supabase_key = st.secrets["supabase_key"]
+supabase_client = create_client(supabase_url,supabase_key)
+
+
 
 
 
@@ -279,7 +281,7 @@ if uploaded_file is not None:
         busy_month = df.groupby(date_column)[qty_column].sum().idxmax()
         Top_products_byRevenue  = df.groupby(product_column)[price_column].sum().sort_values(ascending=False).head(5)
         Top_products_bySales = df.groupby(product_column)[qty_column].sum().sort_values(ascending=False).head(5)
-        
+    
         
         
         profit_margin = st.slider("Estimate profit margin (%)", 0, 100, 0)
@@ -298,8 +300,8 @@ if uploaded_file is not None:
          else:
             price = safe_convert(df,price_column)
             qty = safe_convert(df,qty_column)
-            df['Revenue'] = price*qty
-            df['Profit'] = df['Revenue']*(profit_margin/100)
+            df["Revenue"] = price*qty
+            df['Profit'] = df["Revenue"]*(profit_margin/100)
             profit_souce = "caculated"
          total_profit = df['Profit'].sum()
         except Exception as e:
@@ -308,7 +310,10 @@ if uploaded_file is not None:
          df['Profit'] = 0
          total_profit = 0
         total_loss = df[df['Profit']<0]['Profit'].sum()
-           
+        
+        
+       
+      
 
         # total_loss = 0
 
@@ -434,6 +439,7 @@ if uploaded_file is not None:
         st.subheader('Pareto Analysis')
         st.dataframe(pareto_df.head(top_n))
         st.info(f"Top {top_n} products contribute to 80% of revenue")
+        st.dataframe(df[[product_column,"profit","result"]])
         
        
         best_product = df.groupby(product_column)['Total_revenue'].sum().idxmax()
