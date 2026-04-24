@@ -16,8 +16,8 @@ st.set_page_config(page_title='Defnity', page_icon=':bar_chart:', layout='wide')
 
 # supabase setup
 
-supabase_url =st.secrets["supabase_url"] 
-supabase_key = st.secrets["supabase_key"]
+supabase_url =st.secrets["SUPABASE_URL"] 
+supabase_key = st.secrets["SUPABASE_KEY"]
 supabase_client = create_client(supabase_url,supabase_key)
 
 
