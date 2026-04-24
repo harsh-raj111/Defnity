@@ -439,7 +439,7 @@ if uploaded_file is not None:
         st.subheader('Pareto Analysis')
         st.dataframe(pareto_df.head(top_n))
         st.info(f"Top {top_n} products contribute to 80% of revenue")
-        st.dataframe(df[[product_column,"profit","result"]])
+        
         
        
         best_product = df.groupby(product_column)['Total_revenue'].sum().idxmax()
